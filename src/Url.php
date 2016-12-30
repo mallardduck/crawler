@@ -19,6 +19,9 @@ class Url
     /** @var null|string */
     public $query;
 
+    /** @var \Spatie\Crawler\HtmlNode */
+    public $node;
+
     /**
      * @param string $url
      *
@@ -26,11 +29,26 @@ class Url
      */
     public static function create(string $url)
     {
-        return new static($url);
+        return new static($url, null);
     }
 
-    public function __construct(string $url)
+    /**
+     * @param HtmlNode $node
+     *
+     * @return static
+     */
+    public static function createFromNode(HtmlNode $node)
     {
+        return new static(null, $node);
+    }
+
+    public function __construct($url, $node = null)
+    {
+        if (! is_null($node)) {
+            $url = $node->getNode()->getAttribute('href');
+        } else {
+            $url = $url;
+        }
         $urlProperties = parse_url($url);
 
         foreach (['scheme', 'host', 'path', 'port', 'query'] as $property) {
@@ -38,6 +56,7 @@ class Url
                 $this->$property = $urlProperties[$property];
             }
         }
+        $this->node = $node;
     }
 
     public function isRelative(): bool
