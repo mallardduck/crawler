@@ -8,7 +8,6 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Support\Collection;
-use Symfony\Component\DomCrawler\Link;
 use Psr\Http\Message\ResponseInterface;
 use GuzzleHttp\Exception\RequestException;
 use Symfony\Component\DomCrawler\Crawler as DomCrawler;
@@ -104,7 +103,7 @@ class Crawler
     public function startCrawling($baseUrl)
     {
         if (! $baseUrl instanceof Url) {
-            $baseUrl = Url::create($baseUrl);
+            $baseUrl = Url::createFromString($baseUrl);
         }
 
         $this->baseUrl = $baseUrl;
@@ -158,7 +157,7 @@ class Crawler
     {
         $crawlUrl = $this->crawlQueue->getPendingUrlAtIndex($index);
 
-        $this->crawlObserver->hasBeenCrawled($crawlUrl->url, $response, $crawlUrl->foundOnUrl);
+        $this->crawlObserver->hasBeenCrawled($crawlUrl, $response);
     }
 
     protected function getCrawlRequests(): Generator
@@ -175,7 +174,7 @@ class Crawler
                 continue;
             }
 
-            $this->crawlObserver->willCrawl($crawlUrl->url);
+            $this->crawlObserver->willCrawl($crawlUrl);
 
             $this->crawlQueue->markAsProcessed($crawlUrl);
 
@@ -212,9 +211,12 @@ class Crawler
     {
         $domCrawler = new DomCrawler($html, $foundOnUrl);
 
-        return collect($domCrawler->filterXpath('//a')->links())
-            ->map(function (Link $link) {
-                return Url::create($link->getUri());
+        return collect($domCrawler->filterXpath('//a'))
+            ->reject(function ($value, $key) {
+                return is_null($value->getAttribute('href'));
+            })
+            ->map(function ($node) {
+                return Url::create(HtmlNode::create($node));
             });
     }
 
@@ -225,6 +227,16 @@ class Crawler
      */
     protected function normalizeUrl(Url $url): Url
     {
+        if ($url->isRelative()) {
+            $url->setScheme($this->baseUrl->scheme)
+                ->setHost($this->baseUrl->host)
+                ->setPort($this->baseUrl->port);
+        }
+
+        if ($url->isProtocolIndependent()) {
+            $url->setScheme($this->baseUrl->scheme);
+        }
+
         return $url->removeFragment();
     }
 }
