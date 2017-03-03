@@ -64,6 +64,13 @@ class Url
         return is_null($this->host);
     }
 
+    public function isRelativeToPath(): bool
+    {
+        $doesntStartWithForwardSlash = substr($this->path(), 0, 1) != '/';
+
+        return $this->isRelative() && $doesntStartWithForwardSlash;
+    }
+
     public function isProtocolIndependent(): bool
     {
         return is_null($this->scheme);
@@ -121,11 +128,34 @@ class Url
     }
 
     /**
+     * @param $path
+     *
+     * @return $this
+     */
+    public function setPath(string $path)
+    {
+        $this->path = $path;
+
+        return $this;
+    }
+
+    /**
      * @return null|string
      */
     public function path()
     {
         return $this->path;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function directory()
+    {
+        $segments = $this->segments();
+        array_pop($segments);
+
+        return implode('/', $segments).'/';
     }
 
     /**
