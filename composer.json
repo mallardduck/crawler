@@ -15,16 +15,10 @@
             "email": "freek@spatie.be"
         }
     ],
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/mallardduck/guzzle"
-        }
-    ],
     "require": {
         "php": "^7.0",
         "symfony/dom-crawler": "^3.0",
-        "guzzlehttp/guzzle": "dev-track_redirect_codes",
+        "guzzlehttp/guzzle": "^6.3",
         "tightenco/collect": "^5.3"
     },
     "require-dev": {
