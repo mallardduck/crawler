@@ -192,7 +192,7 @@ class Crawler
                 return $url->hasCrawlableScheme();
             })
             ->map(function (Url $url) use ($foundOnUrl) {
-                return $this->normalizeUrl($url);
+                return $this->normalizeUrl($url, $foundOnUrl);
             })
             ->filter(function (Url $url) {
                 return $this->crawlProfile->shouldCrawl($url);
@@ -211,9 +211,13 @@ class Crawler
     {
         $domCrawler = new DomCrawler($html, $foundOnUrl);
 
-        return collect($domCrawler->filterXpath('//a'))
+        return collect( $domCrawler->filterXpath('//a') )->merge($domCrawler->filterXpath('//img'))
             ->reject(function ($value, $key) {
-                return is_null($value->getAttribute('href'));
+              if ($value->nodeName == "a") {
+                return is_null($value->getAttribute('href')) || empty($value->getAttribute('href'));
+              } elseif ($value->nodeName == "img") {
+                return is_null($value->getAttribute('src')) || empty($value->getAttribute('src'));
+              }
             })
             ->map(function ($node) {
                 return Url::createFromNode(HtmlNode::create($node));
@@ -222,11 +226,17 @@ class Crawler
 
     /**
      * @param \Spatie\Crawler\Url $url
+     * @param \Spatie\Crawler\Url $foundOnUrl
      *
      * @return \Spatie\Crawler\Url
      */
-    protected function normalizeUrl(Url $url): Url
+    protected function normalizeUrl(Url $url, Url $foundOnUrl): Url
     {
+        if ($url->isRelativeToPath()) {
+            $directory = $foundOnUrl->directory();
+            $url->setPath($directory.$url->path());
+        }
+
         if ($url->isRelative()) {
             $url->setScheme($this->baseUrl->scheme)
                 ->setHost($this->baseUrl->host)

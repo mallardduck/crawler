@@ -45,7 +45,11 @@ class Url
     public function __construct($url, $node = null)
     {
         if (! is_null($node)) {
+          if ($node->getNodeType() == "a") {
             $url = $node->getNode()->getAttribute('href');
+          } elseif ($node->getNodeType() == "img") {
+            $url = $node->getNode()->getAttribute('src');
+          }
         } else {
             $url = $url;
         }
@@ -62,6 +66,13 @@ class Url
     public function isRelative(): bool
     {
         return is_null($this->host);
+    }
+
+    public function isRelativeToPath(): bool
+    {
+        $doesntStartWithForwardSlash = substr($this->path(), 0, 1) != '/';
+
+        return $this->isRelative() && $doesntStartWithForwardSlash;
     }
 
     public function isProtocolIndependent(): bool

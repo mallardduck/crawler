@@ -9,6 +9,8 @@ class HtmlNode
     /** @var \DOMElement */
     protected $node;
 
+    protected $nodeType;
+
     /**
      * @param \DOMElement $node
      *
@@ -22,6 +24,7 @@ class HtmlNode
     public function __construct(DOMElement $node)
     {
         $this->node = $node;
+        $this->nodeType = $node->nodeName;
     }
 
     /**
@@ -32,6 +35,16 @@ class HtmlNode
     public function getNode(): DOMElement
     {
         return $this->node;
+    }
+
+    /**
+     * @param void
+     *
+     * @return string
+     */
+    public function getNodeType(): string
+    {
+        return $this->nodeType;
     }
 
     /**
@@ -51,6 +64,10 @@ class HtmlNode
      */
     public function getHtmlAndUpdateHref(string $href): string
     {
+      if ($this->nodeType == "a") {
         return $this->node->setAttribute('href', $href)->ownerDocument->saveHTML($this->node);
+      } elseif ($this->nodeType == "img") {
+        return $this->node->setAttribute('src', $href)->ownerDocument->saveHTML($this->node);
+      }
     }
 }
