@@ -3,7 +3,7 @@
 let app = require('express')();
 
 app.get('/', function (request, response) {
-    response.end('<a href="/link1">Link1</a><a href="/link2">Link2</a><a href="dir/link4">Link4</a><a href="mailto:test@example.com">Email</a>');
+    response.end('<a href="/link1">Link1</a><a href="/link2">Link2</a><a href="dir/link4">Link4</a><a href="mailto:test@example.com">Email</a><a href="/redirect">Redirect!</a>');
 });
 
 app.get('/link1', function (request, response) {
@@ -28,6 +28,10 @@ app.get('/dir/link5', function (request, response) {
 
 app.get('/dir/subdir/link6', function (request, response) {
     response.end('You are on /dir/subdir/link6<a href="/link1">link 1</a>');
+});
+
+app.get('/redirect', function (request, response) {
+    response.redirect('/link1');
 });
 
 let server = app.listen(8080, function () {
