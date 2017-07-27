@@ -23,28 +23,28 @@ class Url
     public $node;
 
     /**
-     * @param HtmlNode $node
-     *
-     * @return static
-     */
-    public static function create(HtmlNode $node)
-    {
-        return new static($node, null);
-    }
-
-    /**
      * @param string $url
      *
      * @return static
      */
-    public static function createFromString(string $url)
+    public static function create(string $url)
     {
-        return new static(null, $url);
+        return new static($url, null);
     }
 
-    public function __construct($node, $url = null)
+    /**
+     * @param HtmlNode $node
+     *
+     * @return static
+     */
+    public static function createFromNode(HtmlNode $node)
     {
-        if (!is_null($node)) {
+        return new static(null, $node);
+    }
+
+    public function __construct($url, $node = null)
+    {
+        if (! is_null($node)) {
             $url = $node->getNode()->getAttribute('href');
         } else {
             $url = $url;
@@ -56,7 +56,7 @@ class Url
                 $this->$property = $urlProperties[$property];
             }
         }
-        $this->node = (!is_null($node)) ? $node : null;
+        $this->node = $node;
     }
 
     public function isRelative(): bool

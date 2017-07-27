@@ -3,11 +3,9 @@
 namespace Spatie\Crawler;
 
 use DOMElement;
-use DOMDocument;
 
 class HtmlNode
 {
-
     /** @var \DOMElement */
     protected $node;
 
@@ -23,7 +21,7 @@ class HtmlNode
 
     public function __construct(DOMElement $node)
     {
-      $this->node = $node;
+        $this->node = $node;
     }
 
     /**
@@ -33,7 +31,7 @@ class HtmlNode
      */
     public function getNode(): DOMElement
     {
-      return $this->node;
+        return $this->node;
     }
 
     /**
@@ -55,5 +53,4 @@ class HtmlNode
     {
         return $this->node->setAttribute('href', $href)->ownerDocument->saveHTML($this->node);
     }
-
 }

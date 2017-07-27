@@ -103,7 +103,7 @@ class Crawler
     public function startCrawling($baseUrl)
     {
         if (! $baseUrl instanceof Url) {
-            $baseUrl = Url::createFromString($baseUrl);
+            $baseUrl = Url::create($baseUrl);
         }
 
         $this->baseUrl = $baseUrl;
@@ -216,7 +216,7 @@ class Crawler
                 return is_null($value->getAttribute('href'));
             })
             ->map(function ($node) {
-                return Url::create(HtmlNode::create($node));
+                return Url::createFromNode(HtmlNode::create($node));
             });
     }
 
